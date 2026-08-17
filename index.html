@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/L Recordings & Exam Tracker</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 950px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Prominent Countdown Banner */
+        .countdown-card {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.25);
+        }
+        .countdown-title { font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.9; font-weight: 600; }
+        .countdown-number { font-size: 64px; font-weight: 800; line-height: 1; margin: 8px 0; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .countdown-label { font-size: 13px; opacity: 0.85; font-weight: 500; }
+
+        h1 { text-align: center; color: #1a73e8; margin-bottom: 5px; font-size: 22px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: 14px; }
+        
+        .progress-box { background: #e8f0fe; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
+        .progress-bar-container { background: #ddd; height: 20px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        .progress-bar { background: #34a853; height: 100%; width: 0%; transition: width 0.3s ease; }
+        
+        .stats { display: flex; justify-content: space-around; margin-top: 10px; font-weight: bold; flex-wrap: wrap; gap: 10px; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { flex: 1; min-width: 120px; padding: 12px; border: none; background: #eee; cursor: pointer; border-radius: 6px; font-size: 15px; font-weight: bold; }
+        .tab-btn.active { background: #1a73e8; color: white; }
+        
+        .topic-container { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+        .topic-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #1a73e8; padding-bottom: 8px; }
+        .topic-title { font-size: 17px; font-weight: bold; color: #1a73e8; }
+        .topic-badge { background: #e8f0fe; color: #1a73e8; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+        
+        /* Weekly Schedule UI */
+        .day-box { background: #ffffff; border: 1px solid #dcdcdc; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+        .day-title { font-weight: bold; color: #333; margin-bottom: 8px; font-size: 14px; display: flex; justify-content: space-between; }
+        .day-hours { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        .video-card { background: white; border: 2px solid #e0e0e0; padding: 10px; border-radius: 8px; text-align: left; cursor: pointer; user-select: none; transition: 0.2s; font-size: 12px; }
+        .video-card.completed { background: #d4edda; border-color: #28a745; color: #155724; text-decoration: line-through; }
+        .video-card input { margin-right: 6px; pointer-events: none; }
+        
+        .hidden { display: none; }
+        .btn-reset { display: block; margin: 25px auto 0; background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Days Left Banner at Top -->
+    <div class="countdown-card">
+        <div class="countdown-title">EXAM COUNTDOWN (2027.07.20)</div>
+        <div class="countdown-number" id="daysCount">0</div>
+        <div class="countdown-label">DAYS REMAINING (ඉතිරි දින ගණන)</div>
+    </div>
+
+    <h1>A/L Recording Tracker</h1>
+    <p class="subtitle">Physics (58 Recordings) | Chemistry (82 Recordings)</p>
+
+    <div class="progress-box">
+        <div><strong>Overall Progress (සම්පූර්ණ ප්‍රගතිය)</strong></div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="stats">
+            <span>Completed: <span id="completedCount">0</span>/140</span>
+            <span>Remaining: <span id="remainingCount">140</span></span>
+            <span>Progress: <span id="percentCount">0</span>%</span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('weekly')">📅 සතිපතා ඉලක්කය (Weekly Schedule)</button>
+        <button class="tab-btn" onclick="switchTab('chemistry')">🧪 Chemistry (82)</button>
+        <button class="tab-btn" onclick="switchTab('physics')">⚡ Physics (58)</button>
+    </div>
+
+    <div id="weeklySection"></div>
+    <div id="chemistrySection" class="hidden"></div>
+    <div id="physicsSection" class="hidden"></div>
+
+    <button class="btn-reset" onclick="resetData()">Reset All Progress</button>
+</div>
+
+<script>
+    function updateExamDays() {
+        const examDate = new Date('2027-07-20T00:00:00').getTime();
+        const now = new Date().getTime();
+        const diff = examDate - now;
+
+        if (diff <= 0) {
+            document.getElementById('daysCount').innerText = "0";
+        } else {
+            const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('daysCount').innerText = daysLeft;
+        }
+    }
+
+    const chemistryTopics = [
+        { name: "පරමාණුක ව්‍යුහය", count: 1 },
+        { name: "ව්‍යුහය සහ බන්ධන", count: 8 },
+        { name: "රසායනික ගණනය කිරීම්", count: 5 },
+        { name: "ද්‍රව්‍යවල වායු අවස්ථාව", count: 3 },
+        { name: "s, p සහ d ගොනු මූලද්‍රව්‍ය", count: 17 },
+        { name: "කාබනික රසායනය", count: 18 },
+        { name: "සමතුලිතතාව", count: 13 },
+        { name: "කාර්මික රසායනය", count: 17 }
+    ];
+
+    const physicsTopics = [
+        { name: "යාන්ත්‍රික විද්‍යාව", count: 17 },
+        { name: "දෝලන සහ තරංග", count: 4 },
+        { name: "ආලෝකය", count: 4 },
+        { name: "තාපය", count: 10 },
+        { name: "ක්ෂේත්‍ර", count: 5 },
+        { name: "ධාරා විද්‍යුතය", count: 8 },
+        { name: "ඉලෙක්ට්‍රොනික විද්‍යාව", count: 4 },
+        { name: "ද්‍රව්‍යවල යාන්ත්‍රික ගුණ", count: 3 },
+        { name: "විකිරණ සහ පදාර්ථ", count: 3 }
+    ];
+
+    let state = JSON.parse(localStorage.getItem('al_tracker_topic_state')) || {};
+
+    function saveState() {
+        localStorage.setItem('al_tracker_topic_state', JSON.stringify(state));
+        updateProgress();
+    }
+
+    function renderSubject(containerId, subjectName, topics) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        topics.forEach((topic, tIndex) => {
+            const topicBox = document.createElement('div');
+            topicBox.className = 'topic-container';
+
+            let doneCount = 0;
+            for (let i = 1; i <= topic.count; i++) {
+                const key = `${subjectName}_${tIndex}_${i}`;
+                if (state[key]) doneCount++;
+            }
+
+            topicBox.innerHTML = `
+                <div class="topic-header">
+                    <div class="topic-title">${topic.name}</div>
+                    <div class="topic-badge">${doneCount} / ${topic.count} Completed</div>
+                </div>
+                <div class="video-grid" id="grid_${subjectName}_${tIndex}"></div>
+            `;
+            container.appendChild(topicBox);
+
+            const grid = topicBox.querySelector(`#grid_${subjectName}_${tIndex}`);
+            for (let i = 1; i <= topic.count; i++) {
+                const key = `${subjectName}_${tIndex}_${i}`;
+                const card = document.createElement('div');
+                card.className = `video-card ${state[key] ? 'completed' : ''}`;
+                card.innerHTML = `<input type="checkbox" ${state[key] ? 'checked' : ''}> Rec ${i}`;
+                card.onclick = () => {
+                    state[key] = !state[key];
+                    saveState();
+                    renderAll();
+                };
+                grid.appendChild(card);
+            }
+        });
+    }
+
+    function renderWeeklyView() {
+        const container = document.getElementById('weeklySection');
+        container.innerHTML = '';
+
+        let chemQueue = [];
+        chemistryTopics.forEach((t, tIndex) => {
+            for (let i = 1; i <= t.count; i++) {
+                chemQueue.push({ key: `chem_${tIndex}_${i}`, label: `🧪 Chem: ${t.name} (Rec ${i})` });
+            }
+        });
+
+        let phyQueue = [];
+        physicsTopics.forEach((t, tIndex) => {
+            for (let i = 1; i <= t.count; i++) {
+                phyQueue.push({ key: `phy_${tIndex}_${i}`, label: `⚡ Phy: ${t.name} (Rec ${i})` });
+            }
+        });
+
+        const dailyPlan = [
+            { day: "සඳුදා (Monday)", hours: "පැය 8", chem: 1, phy: 1 },
+            { day: "අඟහරුවාදා (Tuesday)", hours: "පැය 8", chem: 2, phy: 0 },
+            { day: "බදාදා (Wednesday)", hours: "පැය 8", chem: 1, phy: 1 },
+            { day: "බ්‍රහස්පතින්දා (Thursday)", hours: "පැය 8", chem: 2, phy: 0 },
+            { day: "සිකුරාදා (Friday)", hours: "පැය 8", chem: 1, phy: 1 },
+            { day: "සෙනසුරාදා (Saturday)", hours: "පැය 12", chem: 2, phy: 1 },
+            { day: "ඉරිදා (Sunday)", hours: "පැය 8", chem: 0, phy: 2 }
+        ];
+
+        let weekNum = 1;
+        let chemIdx = 0;
+        let phyIdx = 0;
+
+        while (chemIdx < chemQueue.length || phyIdx < phyQueue.length) {
+            const weekBox = document.createElement('div');
+            weekBox.className = 'topic-container';
+            
+            let weekHTML = `<div class="topic-header"><div class="topic-title">📌 සතිය ${weekNum} (Week ${weekNum})</div></div>`;
+            
+            dailyPlan.forEach(p => {
+                let dayVideos = [];
+                for (let c = 0; c < p.chem && chemIdx < chemQueue.length; c++) dayVideos.push(chemQueue[chemIdx++]);
+                for (let pIdx = 0; pIdx < p.phy && phyIdx < phyQueue.length; pIdx++) dayVideos.push(phyQueue[phyIdx++]);
+
+                if (dayVideos.length > 0) {
+                    weekHTML += `
+                        <div class="day-box">
+                            <div class="day-title">
+                                <span>😱 ${p.day} - වීඩියෝ ${dayVideos.length}</span>
+                                <span class="day-hours">${p.hours}</span>
+                            </div>
+                            <div class="video-grid">
+                    `;
+                    dayVideos.forEach(v => {
+                        const isDone = state[v.key];
+                        weekHTML += `
+                            <div class="video-card ${isDone ? 'completed' : ''}" onclick="toggleVideo('${v.key}')">
+                                <input type="checkbox" ${isDone ? 'checked' : ''}> ${v.label}
+                            </div>
+                        `;
+                    });
+                    weekHTML += `</div></div>`;
+                }
+            });
+
+            weekBox.innerHTML = weekHTML;
+            container.appendChild(weekBox);
+            weekNum++;
+        }
+    }
+
+    function toggleVideo(key) {
+        state[key] = !state[key];
+        saveState();
+        renderAll();
+    }
+
+    function renderAll() {
+        renderSubject('chemistrySection', 'chem', chemistryTopics);
+        renderSubject('physicsSection', 'phy', physicsTopics);
+        renderWeeklyView();
+        updateProgress();
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('weeklySection').classList.add('hidden');
+        document.getElementById('chemistrySection').classList.add('hidden');
+        document.getElementById('physicsSection').classList.add('hidden');
+
+        if (tab === 'weekly') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('weeklySection').classList.remove('hidden');
+        } else if (tab === 'chemistry') {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('chemistrySection').classList.remove('hidden');
+        } else {
+            document.querySelectorAll('.tab-btn')[2].classList.add('active');
+            document.getElementById('physicsSection').classList.remove('hidden');
+        }
+    }
+
+    function updateProgress() {
+        let total = 140;
+        let completed = 0;
+
+        chemistryTopics.forEach((t, tIndex) => {
+            for (let i = 1; i <= t.count; i++) {
+                if (state[`chem_${tIndex}_${i}`]) completed++;
+            }
+        });
+
+        physicsTopics.forEach((t, tIndex) => {
+            for (let i = 1; i <= t.count; i++) {
+                if (state[`phy_${tIndex}_${i}`]) completed++;
+            }
+        });
+
+        const percent = Math.round((completed / total) * 100);
+        document.getElementById('completedCount').innerText = completed;
+        document.getElementById('remainingCount').innerText = total - completed;
+        document.getElementById('percentCount').innerText = percent;
+        document.getElementById('progressBar').style.width = percent + '%';
+    }
+
+    function resetData() {
+        if (confirm("සම්පූර්ණ Progress එක Reset කරන්නද?")) {
+            state = {};
+            saveState();
+            renderAll();
+        }
+    }
+
+    updateExamDays();
+    renderAll();
+</script>
+
+</body>
+</html>
